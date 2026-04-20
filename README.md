@@ -6,7 +6,7 @@
 
 为解决传统开源量化项目数据获取不稳定的痛点，本项目在数据链路与执行层进行了深度重构：
 
-- **数据网关**：全面弃用易被封控的 yfinance，接入 **Alpaca API**（毫秒级 K 线/全网新闻）与 **Finnhub**（专业级财务数据）。
+- **数据网关**：接入 **Alpaca API**（毫秒级 K 线/全网新闻）与 **Finnhub**（专业级财务数据）。
 - **流程编排**：基于 **LangGraph** 实现 StateGraph 状态机，支持并行的 Fan-out 数据拉取与条件路由（Conditional Edges）。
 - **AI 引擎**：支持任意兼容 OpenAI 格式的大模型（GPT-4 / Claude / 深度求索等）作为推理核心。
 - **量化指标**：集成 `pandas_ta` 进行 MACD/RSI/布林带等技术计算，结合 `TextBlob` 实时解析新闻情绪。
