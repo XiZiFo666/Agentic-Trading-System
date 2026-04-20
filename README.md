@@ -1,82 +1,32 @@
-# Python 实现 - 多Agent量化交易系统
+# Agentic-Trading-System | 多智能体量化交易架构
 
-## 技术栈
+本项目是一个基于大语言模型（LLM）与 LangGraph 构建的全自动量化交易系统。系统摒弃了单一指标决策，通过构建多角色 AI 智能体（基本面、技术面、情绪面）进行协同研判，引入创新的“牛熊逻辑辩论”机制过滤模型幻觉，并依托 VaR 风险价值模型实现订单的严格拦截与精准执行。
 
-- **LangGraph** - Agent编排（Fan-out/Fan-in + 条件路由）
-- **LangChain** + **OpenAI GPT-4** - LLM调用
-- **yfinance** - 免费市场数据
-- **pandas_ta** - 技术指标计算
-- **TextBlob** - 新闻情绪NLP分析
+## 🛠 技术栈重构与升级
 
-## 快速开始
+为解决传统开源量化项目数据获取不稳定的痛点，本项目在数据链路与执行层进行了深度重构：
 
+- **数据网关**：全面弃用易被封控的 yfinance，接入 **Alpaca API**（毫秒级 K 线/全网新闻）与 **Finnhub**（专业级财务数据）。
+- **流程编排**：基于 **LangGraph** 实现 StateGraph 状态机，支持并行的 Fan-out 数据拉取与条件路由（Conditional Edges）。
+- **AI 引擎**：支持任意兼容 OpenAI 格式的大模型（GPT-4 / Claude / 深度求索等）作为推理核心。
+- **量化指标**：集成 `pandas_ta` 进行 MACD/RSI/布林带等技术计算，结合 `TextBlob` 实时解析新闻情绪。
+
+## 🚀 快速开始
+
+1. 安装依赖
 ```bash
-# 1. 安装依赖
 pip install -r requirements.txt
 
-# 2. 配置环境变量
-cp ../.env.example ../.env
-# 编辑 ../.env，填入 OPENAI_API_KEY
+2. 配置环境密钥
+在根目录创建 .env 文件，填入你的 API 凭证：
+# LLM 配置
+OPENAI_API_KEY=你的大模型接口Key
+OPENAI_BASE_URL=你的大模型代理地址
 
-# 3. 运行完整决策流程
+# 金融数据与实盘接口
+ALPACA_API_KEY=你的Alpaca_Key
+ALPACA_SECRET_KEY=你的Alpaca_Secret
+FINNHUB_API_KEY=你的Finnhub_Key
+
+3. 运行
 python -m graph.trading_graph
-
-# 4. 运行回测
-python -m backtest.backtester
-```
-
-## 核心代码导读
-
-### 1. LangGraph 编排 (`graph/trading_graph.py`)
-
-这是整个系统的核心。关键代码段：
-
-```python
-# 全局状态：Annotated[list, operator.add] 是并行合并的关键
-class TradingState(TypedDict):
-    ticker: str
-    analyses: Annotated[list[dict], operator.add]  # reducer!
-    debate_result: dict
-    risk_assessment: dict
-    execution_result: dict
-
-# 并行Fan-out：三个节点从同一起点出发
-graph.set_entry_point("fundamental")
-graph.add_edge("__start__", "technical")
-graph.add_edge("__start__", "sentiment")
-
-# 条件路由：风控Agent决定走向
-graph.add_conditional_edges("risk", should_execute,
-    {"execute": "execute", "reject": "reject"})
-```
-
-### 2. 辩论Agent (`agents/debate_agent.py`)
-
-2轮辩论 + Judge裁决的完整实现。
-
-### 3. 风控Agent (`agents/risk_agent.py`)
-
-硬规则 + LLM 双层门控。
-
-## 目录结构
-
-```
-python/
-├── config/settings.py          # 集中配置
-├── agents/
-│   ├── fundamental_agent.py    # 基本面 (PE/PB/ROE)
-│   ├── technical_agent.py      # 技术面 (MACD/RSI/布林带)
-│   ├── sentiment_agent.py      # 情绪面 (新闻NLP/持仓)
-│   ├── debate_agent.py         # 牛熊辩论
-│   ├── risk_agent.py           # 风控守门
-│   └── execution_agent.py      # 执行下单
-├── graph/
-│   └── trading_graph.py        # LangGraph编排（核心）
-├── tools/
-│   ├── market_data.py          # 数据层（带缓存）
-│   ├── technical_indicators.py # 指标计算
-│   └── sentiment_tools.py      # 情绪工具
-├── backtest/
-│   └── backtester.py           # 回测引擎
-└── tests/
-```
