@@ -1,4 +1,4 @@
-# Agentic-Trading-System | 多智能体量化交易架构
+# Agentic-Trading-System | 多智能体量化交易系统
 
 本项目是一个基于大语言模型（LLM）与 LangGraph 构建的全自动量化交易系统。系统摒弃了单一指标决策，通过构建多角色 AI 智能体（基本面、技术面、情绪面）进行协同研判，引入创新的“牛熊逻辑辩论”机制过滤模型幻觉，并依托 VaR 风险价值模型实现订单的严格拦截与精准执行。
 
@@ -12,21 +12,25 @@
 - **量化指标**：集成 `pandas_ta` 进行 MACD/RSI/布林带等技术计算，结合 `TextBlob` 实时解析新闻情绪。
 
 ## 🚀 快速开始
-
 1. 安装依赖
 ```bash
 pip install -r requirements.txt
-
+```
 2. 配置环境密钥
+
 在根目录创建 .env 文件，填入你的 API 凭证：
-# LLM 配置
+LLM 配置
+```bash
 OPENAI_API_KEY=你的大模型接口Key
 OPENAI_BASE_URL=你的大模型代理地址
-
-# 金融数据与实盘接口
+```
+金融数据与实盘接口
+```bash
 ALPACA_API_KEY=你的Alpaca_Key
 ALPACA_SECRET_KEY=你的Alpaca_Secret
 FINNHUB_API_KEY=你的Finnhub_Key
-
+```
 3. 运行
+```bash
 python -m graph.trading_graph
+```
